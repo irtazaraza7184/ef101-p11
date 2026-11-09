@@ -291,10 +291,10 @@ check("Project Schema page embeds the diagram", "GET /about/schema", "img tag po
       'src="/about/schema.svg"' in client.get("/about/schema").get_data(as_text=True))
 contact = client.get("/about/contact").get_data(as_text=True)
 check("Contact page", "GET /about/contact", "email and repository link present",
-      "0h0kgsuss@mozmail.com" in contact and "AbdurRauf-01/ef101-p11" in contact)
+      "0h0kgsuss@mozmail.com" in contact and "irtazaraza7184/ef101-p11" in contact)
 gh = client.get("/github")
 check("GitHub redirect", "GET /github", "302 to the repository",
-      gh.status_code == 302 and gh.headers.get("Location") == "https://github.com/AbdurRauf-01/ef101-p11")
+      gh.status_code == 302 and gh.headers.get("Location") == "https://github.com/irtazaraza7184/ef101-p11")
 credits = client.get("/about/credits").get_data(as_text=True)
 check("Credits content", "GET /about/credits", "all four people listed",
       all(n in credits for n in ["Dr. Fezan Rafique", "Irteza Raza", "Abdur Rauf", "Hassan Majid"]))

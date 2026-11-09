@@ -23,7 +23,7 @@ from queries import (CURRENT_ERROR_STATUSES, CURRENT_FAULT_FIELDS, FAULT_CATEGOR
                      RAM_TYPES, SORT_COLUMNS, WARRANTY_SOON_DAYS)
 
 app = Flask(__name__)
-GITHUB_URL = "https://github.com/AbdurRauf-01/ef101-p11"
+GITHUB_URL = "https://github.com/irtazaraza7184/ef101-p11"
 # The key only signs the flash messages. A fresh random key per start is fine (messages are one-request only).
 app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24).hex()
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024        # no form in this app is anywhere near 64 KB
@@ -427,7 +427,7 @@ def api_next_asset_id():
 
 @app.route("/api/suggested-ip")
 def api_suggested_ip():
-    """Return an auto-generated IP matching ef101-p11-re:
+    """Return an auto-generated IP:
     192.168.{subnet}.{last_two_digits_of_id}."""
     loc = (request.args.get("location") or "").strip()
     aid = (request.args.get("asset_id") or "").strip()
@@ -444,7 +444,7 @@ def api_suggested_ip():
 
 @app.route("/api/reset-demo", methods=["POST"])
 def api_reset_demo():
-    """Reset the database to demo data matching the reset button in ef101-p11-re."""
+    """Reset the database to demo data (same result as python seed.py)."""
     try:
         import seed
         seed.main()

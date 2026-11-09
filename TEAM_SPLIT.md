@@ -6,8 +6,8 @@ Deadline: Monday 9 Nov 2026. The code is already built and tested (`python test_
 
 |  | Irteza Raza<br>(EE-26129): Database | Abdur Rauf<br>(EE-26138): Backend | Hassan Majid<br>(EE-26125): Frontend |
 | --- | --- | --- | --- |
-| Files | `schema.sql`, `db.py`, `queries.py`, `seed.py`, `inventory.db` | `app.py`, `test_app.py`, `migrate.py`, Scripts, `README` | `templates/` (14 files), `static/style.css`, `docs/` diagram |
-| Report sections | 4 Data design, 7 Results | 5 Main code segments, 6 Testing | 1 Problem, 2 Architecture, 3 Technology, 8 Limitations |
+| Files | `schema.sql`, `db.py`, `queries.py`, `seed.py`, `inventory.db` | `app.py`, `test_app.py`, `migrate.py`, Scripts, `README` | No code. Reads and explains `templates/` (14 files), `static/style.css`, `docs/` diagram |
+| Report sections | 4 Data design, 7 Results, 8 Limitations | 1 Problem, 5 Main code segments, 6 Testing, 7 Results, 8 Limitations | 1 Problem, 2 Architecture, 3 Technology, 7 Results, 8 Limitations |
 | Extra | Demo dataset deliverable, data/storage description | README run steps, test evidence | Final report PDF + Classroom upload, demo video (optional), figures |
 
 Put your real name and ID in the contribution table (section 9 of the report) and in the README disclosure. Be honest about what you wrote, changed and checked yourself.
@@ -28,7 +28,7 @@ Put your real name and ID in the contribution table (section 9 of the report) an
 **What you must do**
 
 1. Run `python seed.py`, then open `inventory.db` in DB Browser for SQLite. Write down both tables, their keys and the relationship.
-2. In DB Browser, **Execute SQL** tab, write these 5 queries yourself and check they match the dashboard: total active assets (38), out of warranty (25 on 7 Nov 2026), needs attention (6); the warranty number changes with the date because warranty is computed from today's date, most failing asset (`L1-PC-009`, 6 events), top fault category (Disk failure, 14). Screenshot each result: this is your testing evidence for "dashboard numbers match the data".
+2. In DB Browser, **Execute SQL** tab, write these 5 queries yourself and check they match the dashboard: total active assets (38), out of warranty (25 on 7, 8 and 9 Nov 2026), needs attention (6); the warranty number changes with the date because warranty is computed from today's date, most failing asset (`L1-PC-009`, 6 events), top fault category (Disk failure, 14). Screenshot each result: this is your testing evidence for "dashboard numbers match the data".
 3. **Your own change:** the warranty-after-purchase `CHECK` already exists, so add a different one: `CHECK (storage_gb <= 100000)` on the `assets` table in `schema.sql`. Re-run `python seed.py` and `python test_app.py`. If tests fail, undo the change and tell the team. (Abdur's rule below is about RAM, so the two do not overlap.)
 4. Practise the viva demo: close the app, make a copy of `inventory.db`, delete the original and start the app. It creates a new empty database with six places and no assets, so the dashboard shows zeros. Then run `python seed.py` (or put the copy back) to recover. Explain why a backup of this one file matters.
 5. Export `assets.csv` and `maintenance.csv` from the app and keep them as the "demo dataset" deliverable.
@@ -46,16 +46,17 @@ Put your real name and ID in the contribution table (section 9 of the report) an
 
 ## Abdur Rauf (EE-26138): Backend
 
-**Files:** `app.py`, `test_app.py`
+**Files:** `app.py`, `test_app.py`, `migrate.py`, the launcher scripts (`start.*`, `reset-demo-data.*`, `scripts/`) and `README.md`
 
 **What the code does**
 
 - `app.py` contains **no SQL**; it calls `queries.py`.
 - `validate_asset()` checks every field on the server: required values, positive numbers, valid IP, valid dates, purchase date not in the future, warranty not before purchase, duplicate ID rejected.
 - `warranty_status()` computes Active / Expiring soon / Expired from `warranty_expiry`. `parse_date()` and `today()` are helpers.
-- Routes: `/` and `/dashboard`, `/assets`, `/assets/new`, `/api/next-asset-id`, `/assets/<id>`, `/assets/<id>/edit`, `/assets/<id>/retire`, `/assets/<id>/reactivate`, `/assets/<id>/maintenance`, `/assets/<id>/fault/edit`, `/steps/<id>/edit|delete`, `/maintenance`, `/maintenance/<id>/edit|delete`, `/export/assets.csv`, `/export/maintenance.csv` and the `/about/...` pages.
+- Routes: `/` and `/dashboard`, `/assets`, `/assets/new`, `/api/next-asset-id`, `/api/suggested-ip`, `/api/reset-demo`, `/assets/<id>`, `/assets/<id>/edit`, `/assets/<id>/retire`, `/assets/<id>/reactivate`, `/assets/<id>/maintenance`, `/assets/<id>/fault/edit`, `/steps/<id>/edit|delete`, `/maintenance`, `/maintenance/<id>/edit|delete`, `/export/assets.csv`, `/export/maintenance.csv` and the `/about/...` pages.
 - `csv_response()` builds the CSV download (formula cells are escaped). `guard_requests()` refuses wrong Host headers and cross-site form posts, and `security_headers()` adds the protection headers. Error handlers show friendly pages for 400, 404, 405, 413, 500 and database errors.
-- `test_app.py` runs every check on a temporary database (your real data is never touched) and prints a results table.
+- `asset_edit()` loads the asset, and before showing the edit form turns the database row into a dictionary with blank text for empty values (the fix for the version 1 error described in report section 5).
+- `test_app.py` runs every check (229 in version 19) on a temporary database (your real data is never touched) and prints a results table.
 
 **What you must do**
 
@@ -73,10 +74,13 @@ Put your real name and ID in the contribution table (section 9 of the report) an
 - What is a route? What does Flask do?
 - Where is the needs-attention rule, and how do you change it?
 - What needs the Internet? (Nothing.) Name one limitation (no login).
+- What was the major error in version 1 and how was it fixed? (Editing an existing asset crashed because the form template calls `.get()` on a database row, which has no `get`; the edit route now passes a dictionary. Adding worked because it already passed a dictionary.)
 
 ---
 
 ## Hassan Majid (EE-26125): Frontend
+
+**Viva:** all frontend questions (templates, CSS, pages, charts, filters, forms) are Hassan's. He proposed the interface ideas (theme, sidebar, sidebar sections, assets list sorting). Irteza and Abdur built them in version 19 with AI help, and the team checked them. Hassan writes no code.
 
 **Files:** all 14 files in `templates/` (`base`, `assets`, `asset_form`, `asset_detail`, `asset_fault_edit`, `step_edit`, `maintenance`, `maintenance_edit`, `dashboard`, `message`, `about_credits`, `about_privacy`, `about_contact`, `about_schema`), `static/style.css`, and the diagram in `docs/`
 
@@ -92,15 +96,16 @@ Put your real name and ID in the contribution table (section 9 of the report) an
 
 **What you must do**
 
-1. Click through every page and take clean screenshots for the report: dashboard, asset list with a filter applied, add form with an error, asset detail with history.
+1. Click through every page of version 19 and check each one against your interface ideas (theme, sidebar, sidebar sections, assets list sorting).
 2. Map each page to its template and the data `app.py` passes in (for example `/assets` passes `assets`, `opts`, `f`).
-3. **Your own change:** add an OS column to the asset table: the headings come from `ASSET_COLUMNS` in `app.py` (ask Abdur to add `("os", "OS")` in the position you want, and `"os": "a.os"` to `SORT_COLUMNS` in `queries.py` so the heading can sort) and one `<td>{{ a.os }}</td>` goes in the same position in each row of `assets.html`. Also change one colour variable in `:root` of `style.css`. Check all pages still look right.
-4. Own the final report: assemble the sections from A and B, insert the schema image from `docs/project-schema.png` as Figure 1, export to PDF, check the page count (short report), and upload to Google Classroom.
+3. **Your own task (no code):** on paper, propose one more interface change (for example a different colour for Under Repair, or an extra sidebar section). Write which template and which CSS variable it would touch, and how you would test it. Explain it in the viva.
+4. Own the final report: assemble the sections from Irteza and Abdur, insert the schema image from `docs/project-schema.png` as Figure 1, export to PDF, check the page count (short report), and upload to Google Classroom.
 5. Optional: record a 2 to 3 minute demo video (add an asset, log a fault, filter, dashboard, export).
-6. Write report sections 1, 2, 3 and 8.
+6. Write report sections 1, 2, 3, 7 and 8.
 
 **Viva questions you must answer**
 
+- Which interface ideas did you propose, and how did they end up in version 19? (Irteza and Abdur built them; explain each one.)
 - How does the browser get the dashboard charts? (CSS bar widths calculated from the data, no Internet or library.)
 - What is a template, and why does `base.html` exist?
 - Why does the form use POST for saving but GET for filtering?
@@ -111,10 +116,10 @@ Put your real name and ID in the contribution table (section 9 of the report) an
 
 ## Everyone
 
-**GitHub:** Abdur Rauf (EE-26138) creates the repository and adds Irteza Raza (EE-26129) and Hassan Majid (EE-26125) under Settings, Collaborators. Then each member clones it once and pushes only his own files:
+**GitHub:** the repository is now owned by Irteza Raza (EE-26129), at https://github.com/irtazaraza7184/ef101-p11. Irteza Raza adds Abdur Rauf (EE-26138) and Hassan Majid (EE-26125) under Settings, Collaborators. Abdur Rauf, the previous owner, still commits: each member does his work and submits the changes to Abdur Rauf, and Abdur Rauf clones the repository and commits:
 
 ```
-git clone <repo URL>
+git clone https://github.com/irtazaraza7184/ef101-p11.git
 cd ef101-p11
 ```
 
@@ -122,9 +127,9 @@ Every time you finish work:
 
 ```
 git pull --rebase
-git add schema.sql db.py queries.py seed.py inventory.db     # Irteza
-git add app.py test_app.py migrate.py scripts README.md CHANGELOG.md   # Abdur
-git add templates static docs                              # Hassan
+git add schema.sql db.py queries.py seed.py inventory.db     # Irteza Raza
+git add app.py test_app.py                                   # Abdur Rauf
+git add templates static                                     # Hassan Majid
 git commit -m "describe what you changed"
 git push
 ```
@@ -133,7 +138,8 @@ git push
 
 | Dates | Do |
 | --- | --- |
-| Sun 8 Nov | Clone the repository into a fresh folder and run it. Run `python seed.py` and `python test_app.py`. Fill the report TODOs, add screenshots, assemble the final report, push, upload. Laptop ready. |
+| Sun 8 Nov | Fill the report TODOs, add screenshots, assemble the final report, push, upload. Laptop ready. |
 | Mon 9 Nov | Submission. |
 
+\
 **Be ready for live changes in the viva:** add a record, change a filter, change the needs-attention rule, enter bad data and show the validation.

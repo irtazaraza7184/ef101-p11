@@ -535,7 +535,7 @@ def ip_owner(location, ip, exclude_id=""):
 
 
 def auto_ip_address(asset_id, location, subnet=None):
-    """Auto-assign IP address from Asset ID and location matching ef101-p11-re:
+    """Auto-assign IP address from Asset ID and location:
     192.168.{subnet}.{last_two_digits_of_id}.
     Example: L1-PC-004 in Lab 1 (subnet 1) -> 192.168.1.4
              L2-PC-008 in Lab 2 (subnet 2) -> 192.168.2.8
@@ -561,7 +561,7 @@ def auto_ip_address(asset_id, location, subnet=None):
 
 
 def suggest_ip(location, subnet=None, asset_id=None):
-    """Return an auto-generated IP for this location matching ef101-p11-re."""
+    """Return an auto-generated IP for this location."""
     if asset_id:
         return auto_ip_address(asset_id, location, subnet=subnet)
     
