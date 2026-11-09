@@ -1,5 +1,8 @@
 # EF101-P11 Computer Hardware Inventory and Maintenance System
 
+> # **Project History Notice:** 
+> ## For all commits, and project history prior to **November 9, 2026**, please visit the legacy repository: [AbdurRauf-01/ef101-p11](https://github.com/AbdurRauf-01/ef101-p11).
+
 Flask + SQLite web app that tracks computer assets (specs, location, warranty, status) and their maintenance/fault history, with a dashboard and CSV export. All data in `inventory.db` is **DEMO data**, not real assets.
 
 ## Project schema
